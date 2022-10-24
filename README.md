@@ -32,5 +32,5 @@ poetry shell
 ## Execução
 
 ```bash
-python validador_cpf
+python validador_cpf.py
 ```
