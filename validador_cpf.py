@@ -1,4 +1,3 @@
-import pytest
 import os
 from random import randrange
 
@@ -6,41 +5,30 @@ from random import randrange
 os.system("cls" if os.name == "nt" else "clear")
 
 
+def calcula_dv1(cpf):
+    soma = 0
+    i = 10
+    while i >= 2:
+        for digito in cpf[:9]:
+            soma += int(digito) * i
+            i -= 1
+    dv1 = (soma * 10) % 11
+    return 0 if dv1 == 10 else dv1
+
+
+def calcula_dv2(cpf):
+    soma = 0
+    i = 11
+    while i >= 2:
+        for digito in cpf[:10]:
+            soma += int(digito) * i
+            i -= 1
+    dv2 = (soma * 10) % 11
+    return 0 if dv2 == 10 else dv2
+
+
 def valida_cpf(cpf):
-    def calcula_dv1(cpf):
-        soma = 0
-        i = 10
-        while i >= 2:
-            for digito in cpf[:9]:
-                soma += digito * i
-                i -= 1
-        resto1 = (soma * 10) % 11
-        if resto1 == 10:
-            resto1 = 0
-        return resto1
-
-    def calcula_dv2(cpf):
-        soma = 0
-        i = 11
-        while i >= 2:
-            for digito in cpf[:10]:
-                soma += digito * i
-                i -= 1
-        resto2 = (soma * 10) % 11
-        if resto2 == 10:
-            resto2 = 0
-        return resto2
-
-    def adiciona_mascara_cpf(cpf):
-        cpf_sem_mascara = [str(digito) for digito in cpf]
-        cpf_com_mascara = cpf_sem_mascara[:]
-        cpf_com_mascara.insert(3, ".")
-        cpf_com_mascara.insert(7, ".")
-        cpf_com_mascara.insert(11, "-")
-        return "".join(cpf_com_mascara), "".join(cpf_sem_mascara)
-
     cpf = [int(digito) for digito in cpf]
-
     if len(set(cpf)) == 1:
         cpf_valido = False
     else:
@@ -50,22 +38,23 @@ def valida_cpf(cpf):
             cpf_valido = True
         else:
             cpf_valido = False
+    return cpf_valido
 
-    return cpf_valido, calcula_dv1(cpf), calcula_dv2(cpf), adiciona_mascara_cpf(cpf)
+
+def adiciona_mascara_cpf(cpf):
+    return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
 
 
 def gera_cpf_valido():
     numeros = "".join([f"{randrange(0, 10)}" for i in range(9)])
-
-    dv1 = valida_cpf(numeros)[1]
+    while len(set(numeros)) == 1:
+        numeros = "".join([f"{randrange(0, 10)}" for i in range(9)])
+    dv1 = calcula_dv1(numeros)
     numeros = numeros + f"{dv1}"
-
-    dv2 = valida_cpf(numeros)[2]
+    dv2 = calcula_dv2(numeros)
     numeros = numeros + f"{dv2}"
-
-    cpf_com_mascara = valida_cpf(numeros)[3][0]
-    cpf_sem_mascara = valida_cpf(numeros)[3][1]
-
+    cpf_com_mascara = adiciona_mascara_cpf(numeros)
+    cpf_sem_mascara = numeros
     return cpf_com_mascara, cpf_sem_mascara
 
 
@@ -81,15 +70,14 @@ def main():
     )
     while opcao not in (0, 1, 2):
         opcao = int(input("Opção inválida! Tente novamente.\n> "))
-
     if opcao == 1:
         cpf = input("Digite o CPF para validação (apenas números): ")
         while len(cpf) != 11:
             cpf = input(
                 "CPF incorreto!\nDigite o CPF para validação (apenas números): "
             )
-        cpf_valido = valida_cpf(cpf)[0]
-        cpf_com_mascara = valida_cpf(cpf)[3][0]
+        cpf_valido = valida_cpf(cpf)
+        cpf_com_mascara = adiciona_mascara_cpf(cpf)
         print(f"\nCPF: {cpf_com_mascara}")
         print(
             f"Situação: \033[32mCPF válido!\033[m"
@@ -109,16 +97,9 @@ def main():
 
 
 if __name__ == "__main__":
-    assert valida_cpf("75405260681")[0]
-    assert valida_cpf("77136427495")[0]
-    assert valida_cpf("68322145454")[0]
-    assert valida_cpf("01334623589")[0]
-    assert valida_cpf("54144353320")[0]
-
-    assert not valida_cpf("00000000000")[0]
-    assert not valida_cpf("33333333333")[0]
-    assert not valida_cpf("99999999999")[0]
-    assert not valida_cpf("23891375711")[0]
-    assert not valida_cpf("11434221074")[0]
-
     main()
+    while True:
+        continuar = input("\nDeseja continuar? (S/N) ")
+        if continuar not in ("S", "s", ""):
+            break
+        main()
