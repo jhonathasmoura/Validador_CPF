@@ -29,6 +29,12 @@ Inicie um novo shell e ative o ambiente virtual:
 poetry shell
 ```
 
+## Testes
+
+```bash
+python test_validador_cpf.py
+```
+
 ## Execução
 
 ```bash
